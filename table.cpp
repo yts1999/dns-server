@@ -1,6 +1,6 @@
-#include "include/table.h"
+#include "table.h"
 
-#include "include/utils.h"
+#include "utils.h"
 
 HostsTable::HostsTable() {
 	readFile();

@@ -1,4 +1,4 @@
-#include "include/parser.h"
+#include "parser.h"
 
 Parser::Parser() {
 	table = new HostsTable();
@@ -38,14 +38,14 @@ void Parser::parse() {
 		parseQuery();
 	//	send2Server();
 		break;
-	} 
+	}
 }
 
 void Parser::parseQuery() {
 //	Message bufferMessage = message;
 	bool bad = 0;
 	for (auto query = message.question.begin(); query != message.question.end(); ++query) {
-		
+
 		if (!(query->QType == 1 && query->QClass == 1)) {
 			std::cout << "Query unacceptable, to name server..." << std::endl;
 			send2Server();
@@ -121,10 +121,7 @@ void Parser::recvServer() {
 		std::cout << "Receieved ID: " << message.header.id << std::endl;
 		uint16_t *IDPtr = (uint16_t *)buffer;
 		*IDPtr = htons(record.id);
-		
+
 		sockOperator->sendBuffer(buffer, bufferSize, record.sendAddr);
 	}
 }
-
-
-

@@ -1,4 +1,4 @@
-#include "include/record.h"
+#include "record.h"
 
 RecordTable::RecordTable() {
 	curNumber = 0;

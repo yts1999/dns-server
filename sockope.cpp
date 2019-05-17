@@ -1,4 +1,4 @@
-#include "include/sockope.h"
+#include "sockope.h"
 
 SocketOperator::SocketOperator() {
 	hostSocket = socket(PF_INET, SOCK_DGRAM, UDP_PROTO);
@@ -26,7 +26,7 @@ int SocketOperator::recvMessage(uint8_t *buffer, sockaddr_in &senderAddr) {
 	socklen_t addrLen = sizeof(sockaddr_in);
 	sockaddr_in clientAddr;
 
-	int recvLen = recvfrom(hostSocket, (char *)buffer, MAX_MESSAGE, 
+	int recvLen = recvfrom(hostSocket, (char *)buffer, MAX_MESSAGE,
 	                       0, (sockaddr *)&clientAddr, &addrLen);
 	if (recvLen <= 0) {
 		std::cout << "Connention Error" << std::endl;
@@ -42,7 +42,7 @@ void SocketOperator::sendMessage(const Message &message) {
 	uint8_t buffer[MAX_MESSAGE];
 	int bufSize;
 	message.pac2Buf(buffer, bufSize);
-	if (sendto(hostSocket, buffer, bufSize, 0, 
+	if (sendto(hostSocket, buffer, bufSize, 0,
 	    (const sockaddr*)&message.sendAddr, sizeof(sockaddr_in)) < 0) {
 			std::cout << "Send Error" << std::endl;
 			exit(0);
@@ -58,5 +58,3 @@ void SocketOperator::sendBuffer(uint8_t *buffer, int bufferSize, sockaddr_in add
 			std::cout << "Send buffer seccess!" << std::endl;
 		}
 }
-
-

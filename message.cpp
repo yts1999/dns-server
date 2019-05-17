@@ -1,4 +1,4 @@
-#include "include/message.h"
+#include "message.h"
 
 Message::Message() {
 
@@ -28,7 +28,7 @@ std::string Message::getDomainName(const std::string &name)  {
 		if (*nameStr != '\0') {
 			buffer.append(1, '.');
 		}
-		
+
 	}
 	toLower(buffer);
 	return buffer;
@@ -42,7 +42,7 @@ void Message::getHeader(uint8_t *&bufPtr) {
 	uint16_t *headerPtr = (uint16_t *)bufPtr;
 	header.id          = ntohs(*(headerPtr    ));
 	uint16_t headerBuf = ntohs(*(headerPtr + 1));
-	
+
 	header.qr     = (headerBuf & 0x8000) >> 15;
 	header.opCode = (headerBuf & 0x7800) >> 11;
 	header.aa     = (headerBuf & 0x0400) >> 10;
@@ -95,7 +95,7 @@ void Message::getResource(uint8_t *&bufPtr, std::vector<Message::Resource> &reso
 		}
 		nameBuf.append(1, '\0');
 		bufPtr = (uint8_t *)namePtr + 1;
-		
+
 		getdWord(resourceBuf.type, bufPtr);
 		getdWord(resourceBuf.clas, bufPtr);
 		getqWord(resourceBuf.ttl,  bufPtr);
@@ -122,7 +122,7 @@ void Message::getqWord(uint32_t &target, uint8_t *&bufPtr) {
 std::ostream &operator << (std::ostream &os,
                                const Message::Header &header)
     {
-        return os << "ID: " 
+        return os << "ID: "
             << std::right << std::hex << header.id << std::dec
             << " QR: " << header.qr
             << " OPCODE: " << (uint16_t) header.opCode
@@ -139,8 +139,3 @@ std::ostream &operator << (std::ostream &os,
 			<< " arCount: " << header.arCount
             << std::endl;
     }
-
-
-
-
-
