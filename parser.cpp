@@ -100,13 +100,13 @@ void Parser::prepAnswerMsg(DoubleWordIP answerIP, std::string &name) {
 	answerBuffer.clas = 1;
 	answerBuffer.ttl  = 120;
 	answerBuffer.rdLength++;
-	answerBuffer.rData.assign((uint8_t *)&answerIP, (uint8_t *)(&answerIP + 1));
+	answerBuffer.rData.assign((unsigned char *)&answerIP, (unsigned char *)(&answerIP + 1));
 	message.answer.push_back(answerBuffer);
 }
 
 void Parser::send2Server() {
-	uint16_t recordID = records->insertRecord(message);
-	uint16_t *IDPtr = (uint16_t *)buffer;
+	unsigned short recordID = records->insertRecord(message);
+	unsigned short *IDPtr = (unsigned short *)buffer;
 	*IDPtr = htons(recordID);
 	sockOperator->sendBuffer(buffer, bufferSize, serverAddr);
 }
@@ -119,7 +119,7 @@ void Parser::recvServer() {
 		exit(0);
 	} else {
 		std::cout << "Receieved ID: " << message.header.id << std::endl;
-		uint16_t *IDPtr = (uint16_t *)buffer;
+		unsigned short *IDPtr = (unsigned short *)buffer;
 		*IDPtr = htons(record.id);
 
 		sockOperator->sendBuffer(buffer, bufferSize, record.sendAddr);

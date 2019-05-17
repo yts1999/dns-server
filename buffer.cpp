@@ -1,29 +1,29 @@
 #include "message.h"
 #include <cstring>
 
-void Message::dWord2Buf(uint16_t value, uint8_t *&bufPtr, int &curBufSize) const {
-	uint16_t *dWordPtr = (uint16_t *)bufPtr;
-	*dWordPtr = (uint16_t)(htons(value));
-	curBufSize += sizeof(uint16_t);
-	bufPtr += sizeof(uint16_t);
+void Message::dWord2Buf(unsigned short value, unsigned char *&bufPtr, int &curBufSize) const {
+	unsigned short *dWordPtr = (unsigned short *)bufPtr;
+	*dWordPtr = (unsigned short)(htons(value));
+	curBufSize += sizeof(unsigned short);
+	bufPtr += sizeof(unsigned short);
 	if (curBufSize > BUF_SIZE) {
 		std::cout << "Buffer Overflow" << std::endl;
 		exit(0);
 	}
 }
 
-void Message::qWord2Buf(uint32_t value, uint8_t *&bufPtr, int &curBufSize) const {
-	uint32_t *qWordPtr = (uint32_t *)bufPtr;
-	*qWordPtr = (uint32_t)(htonl(value));
-	curBufSize += (int)sizeof(uint32_t);
-	bufPtr += sizeof(uint32_t);
+void Message::qWord2Buf(unsigned int value, unsigned char *&bufPtr, int &curBufSize) const {
+	unsigned int *qWordPtr = (unsigned int *)bufPtr;
+	*qWordPtr = (unsigned int)(htonl(value));
+	curBufSize += (int)sizeof(unsigned int);
+	bufPtr += sizeof(unsigned int);
 	if (curBufSize > BUF_SIZE) {
 		std::cout << "Buffer Overflow" << std::endl;
 		exit(0);
 	}
 }
 
-void Message::setHeaderBuf(uint16_t &headerBuf) const {
+void Message::setHeaderBuf(unsigned short &headerBuf) const {
 	headerBuf |= (header.qr     <<  15);
 	headerBuf |= (header.opCode <<  11);
 	headerBuf |= (header.aa     <<  10);
@@ -34,7 +34,7 @@ void Message::setHeaderBuf(uint16_t &headerBuf) const {
 	headerBuf |= (header.rCode  <<   0);
 }
 
-void Message::question2Buf(uint8_t *&bufPtr, int &curBufSize) const {
+void Message::question2Buf(unsigned char *&bufPtr, int &curBufSize) const {
 	for (auto iter = question.begin(); iter != question.end(); iter++) {
 		const char *nameStr = iter->QName.c_str();
 		size_t nameLen = iter->QName.size();
@@ -47,7 +47,7 @@ void Message::question2Buf(uint8_t *&bufPtr, int &curBufSize) const {
 }
 
 void Message::resource2Buf(std::vector<Resource> resourceVec,
-                           uint8_t *&bufPtr, int &curBufSize) const {
+                           unsigned char *&bufPtr, int &curBufSize) const {
 	for (auto iter = resourceVec.begin(); iter != resourceVec.end(); iter++) {
 		const char *nameStr = iter->name.c_str();
 		size_t nameLen = iter->name.size();
@@ -58,9 +58,9 @@ void Message::resource2Buf(std::vector<Resource> resourceVec,
 		dWord2Buf(iter->type, bufPtr, curBufSize);
 		dWord2Buf(iter->clas, bufPtr, curBufSize);
 		qWord2Buf(iter->ttl, bufPtr, curBufSize);
-		dWord2Buf((uint16_t)(iter->rData.size()), bufPtr, curBufSize);
+		dWord2Buf((unsigned short)(iter->rData.size()), bufPtr, curBufSize);
 
-		uint8_t *dataArr = iter->rData.data();
+		unsigned char *dataArr = iter->rData.data();
 		size_t dataSize = iter->rData.size();
 		bufPtr += dataSize;
 		curBufSize += dataSize;
@@ -68,16 +68,16 @@ void Message::resource2Buf(std::vector<Resource> resourceVec,
 	}
 }
 
-void Message::pac2Buf(uint8_t *buf, int &bufLen) const {
-	uint16_t headerBuf = 0;
+void Message::pac2Buf(unsigned char *buf, int &bufLen) const {
+	unsigned short headerBuf = 0;
 	bufLen = 0;
 	setHeaderBuf(headerBuf);
 	dWord2Buf(header.id, buf, bufLen);
 	dWord2Buf(headerBuf, buf, bufLen);
-	dWord2Buf((uint16_t)question.size(), buf, bufLen);
-	dWord2Buf((uint16_t)answer.size(), buf, bufLen);
-	dWord2Buf((uint16_t)authority.size(), buf, bufLen);
-	dWord2Buf((uint16_t)additional.size(), buf, bufLen);
+	dWord2Buf((unsigned short)question.size(), buf, bufLen);
+	dWord2Buf((unsigned short)answer.size(), buf, bufLen);
+	dWord2Buf((unsigned short)authority.size(), buf, bufLen);
+	dWord2Buf((unsigned short)additional.size(), buf, bufLen);
 	question2Buf(buf, bufLen);
 	resource2Buf(answer, buf, bufLen);
 	resource2Buf(authority, buf, bufLen);

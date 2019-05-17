@@ -4,9 +4,9 @@ Message::Message() {
 
 }
 
-Message::Message(const sockaddr_in addr, const uint8_t *buf, int bufLen) :
+Message::Message(const sockaddr_in addr, const unsigned char *buf, int bufLen) :
 	sendAddr(addr) {
-	uint8_t *ptrBuffer = (uint8_t *)buf;
+	unsigned char *ptrBuffer = (unsigned char *)buf;
 	getHeader(ptrBuffer);
 	if (header.qr == 0) {
 		getQuestion(ptrBuffer);
@@ -38,10 +38,10 @@ std::string Message::Question::getName() const {
 	return getDomainName(QName);
 }
 
-void Message::getHeader(uint8_t *&bufPtr) {
-	uint16_t *headerPtr = (uint16_t *)bufPtr;
+void Message::getHeader(unsigned char *&bufPtr) {
+	unsigned short *headerPtr = (unsigned short *)bufPtr;
 	header.id          = ntohs(*(headerPtr    ));
-	uint16_t headerBuf = ntohs(*(headerPtr + 1));
+	unsigned short headerBuf = ntohs(*(headerPtr + 1));
 
 	header.qr     = (headerBuf & 0x8000) >> 15;
 	header.opCode = (headerBuf & 0x7800) >> 11;
@@ -61,20 +61,20 @@ void Message::getHeader(uint8_t *&bufPtr) {
 	std::cout << header;
 }
 
-void Message::getQuestion(uint8_t *&bufPtr) {
+void Message::getQuestion(unsigned char *&bufPtr) {
 	for (int count = 0; count < header.qdCount; count++) {
 		// not parse compressed domain name
 		Question questionBuf;
 		std::string nameBuf = "";
 		char *namePtr = (char *)bufPtr;
 		while (*namePtr != 0) {
-			uint8_t sectionSize = *namePtr;
+			unsigned char sectionSize = *namePtr;
 		//	std::cout << "Name size: " << (int)sectionSize << std::endl;
 			nameBuf.append(namePtr, sectionSize + 1);
 			namePtr += (sectionSize + 1);
 		}
 		nameBuf.append(1, '\0');
-		bufPtr = (uint8_t *)namePtr + 1;
+		bufPtr = (unsigned char *)namePtr + 1;
 		questionBuf.QName = nameBuf;
 		getdWord(questionBuf.QType, bufPtr);
 		getdWord(questionBuf.QClass, bufPtr);
@@ -83,18 +83,18 @@ void Message::getQuestion(uint8_t *&bufPtr) {
 	std::cout << "Question set done!" << std::endl;
 }
 
-void Message::getResource(uint8_t *&bufPtr, std::vector<Message::Resource> &resourceVec, uint16_t count) {
+void Message::getResource(unsigned char *&bufPtr, std::vector<Message::Resource> &resourceVec, unsigned short count) {
 	for (int _count = 0; _count < count; _count++) {
 		Resource resourceBuf;
 		std::string nameBuf = "";
 		char *namePtr = (char *)bufPtr;
 		while (namePtr != 0) {
-			uint8_t sectionSize = *namePtr;
+			unsigned char sectionSize = *namePtr;
 			nameBuf.append(namePtr, sectionSize + 1);
 			namePtr += sectionSize + 1;
 		}
 		nameBuf.append(1, '\0');
-		bufPtr = (uint8_t *)namePtr + 1;
+		bufPtr = (unsigned char *)namePtr + 1;
 
 		getdWord(resourceBuf.type, bufPtr);
 		getdWord(resourceBuf.clas, bufPtr);
@@ -107,16 +107,16 @@ void Message::getResource(uint8_t *&bufPtr, std::vector<Message::Resource> &reso
 	}
 }
 
-void Message::getdWord(uint16_t &target, uint8_t *&bufPtr) {
-	uint16_t *dWordPtr = (uint16_t *)bufPtr;
+void Message::getdWord(unsigned short &target, unsigned char *&bufPtr) {
+	unsigned short *dWordPtr = (unsigned short *)bufPtr;
 	target = ntohs(*dWordPtr);
-	bufPtr += sizeof(uint16_t);
+	bufPtr += sizeof(unsigned short);
 }
 
-void Message::getqWord(uint32_t &target, uint8_t *&bufPtr) {
-	uint32_t *qWordPtr = (uint32_t *)bufPtr;
+void Message::getqWord(unsigned int &target, unsigned char *&bufPtr) {
+	unsigned int *qWordPtr = (unsigned int *)bufPtr;
 	target = ntohs(*qWordPtr);
-	bufPtr += sizeof(uint32_t);
+	bufPtr += sizeof(unsigned int);
 }
 
 std::ostream &operator << (std::ostream &os,
@@ -125,13 +125,13 @@ std::ostream &operator << (std::ostream &os,
         return os << "ID: "
             << std::right << std::hex << header.id << std::dec
             << " QR: " << header.qr
-            << " OPCODE: " << (uint16_t) header.opCode
+            << " OPCODE: " << (unsigned short) header.opCode
             << " AA: " << header.aa
             << " TC: " << header.tc
             << " RD: " << header.rd
             << " RA: " << header.ra
-            << " ZERO: " << (uint16_t) header.z
-            << " RCODE: " << (uint16_t) header.rCode
+            << " ZERO: " << (unsigned short) header.z
+            << " RCODE: " << (unsigned short) header.rCode
 			<< std::endl
 			<< " qdCount: " << header.qdCount
 			<< " anCount: " << header.anCount
