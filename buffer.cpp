@@ -1,4 +1,5 @@
 #include "message.h"
+#include <cstring>
 
 void Message::dWord2Buf(uint16_t value, uint8_t *&bufPtr, int &curBufSize) const {
 	uint16_t *dWordPtr = (uint16_t *)bufPtr;
@@ -45,7 +46,7 @@ void Message::question2Buf(uint8_t *&bufPtr, int &curBufSize) const {
 	}
 }
 
-void Message::resource2Buf(std::vector<Resource> resourceVec, 
+void Message::resource2Buf(std::vector<Resource> resourceVec,
                            uint8_t *&bufPtr, int &curBufSize) const {
 	for (auto iter = resourceVec.begin(); iter != resourceVec.end(); iter++) {
 		const char *nameStr = iter->name.c_str();

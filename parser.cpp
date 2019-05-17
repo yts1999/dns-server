@@ -4,7 +4,7 @@ Parser::Parser() {
 	table = new HostsTable();
 	sockOperator = new SocketOperator();
 	records = new RecordTable();
-	buffer = new uint8_t(BUF_SIZE);
+	buffer = new unsigned char(BUF_SIZE);
 	setServerAddr();
 }
 
