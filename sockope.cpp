@@ -6,11 +6,11 @@ SocketOperator::SocketOperator() {
 		sockaddr_in hostAddr;
 		hostAddr.sin_family = AF_INET;
 		hostAddr.sin_port = htons(PORT);
-		hostAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+		hostAddr.sin_addr.s_addr = 0;
 
 		if (bind(hostSocket, (sockaddr *)&hostAddr, sizeof(sockaddr_in))) {
 			std::cout << "Local binding Error" << std::endl;
-			exit(1);
+		//	exit(1);
 		} else {
 			std::cout << "<Local binding Success, Start listening..." << std::endl;
 		}
