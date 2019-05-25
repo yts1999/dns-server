@@ -3,7 +3,12 @@
 202.108.33.89 sina 
 61.135.181.175 sohu
 123.127.134.10 bupt
+<<<<<<< HEAD
 66.102.251.33 sina.com
 0.0.0.0 ad4.sina.com.cn
 0.0.0.0 www.163daohang.com.cn 
 0.0.0.0 pornhub.com
+=======
+0.0.0.0 ad4.sina.com.cn
+0.0.0.0 www.163daohang.com.cn 
+>>>>>>> 13dbe758e95a9a5d65e018c60067539434277908

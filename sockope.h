@@ -10,7 +10,11 @@
 const std::string NAME_SERVER_IP = "114.114.114.114";
 
 #define SOCKET int
+<<<<<<< HEAD
 #define UDP_PROTO        0
+=======
+#define UDP_PROTO        17
+>>>>>>> 13dbe758e95a9a5d65e018c60067539434277908
 #define PORT             53
 #define MAX_MESSAGE      4096
 
@@ -24,7 +28,14 @@ public:
 	void sendServerPac(const Message &message);
 private:
 	SOCKET hostSocket;
+<<<<<<< HEAD
 	
 };
 
 #endif // SOCKOPE_H
+=======
+
+};
+
+#endif // SOCKOPE_H
+>>>>>>> 13dbe758e95a9a5d65e018c60067539434277908

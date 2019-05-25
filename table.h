@@ -5,6 +5,10 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 13dbe758e95a9a5d65e018c60067539434277908
 #include <cstring>
 
 #include "network.h"
