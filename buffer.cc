@@ -1,4 +1,5 @@
 #include "message.h"
+#include <cstring>
 
 void Message::dWord2Buf(uint16_t value, uint8_t *&bufPtr, int &curBufSize) const {
 	uint16_t *dWordPtr = (uint16_t *)bufPtr;
