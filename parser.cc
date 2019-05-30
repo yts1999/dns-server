@@ -144,7 +144,7 @@ void Parser::recvServer() {
 			}
 		}
 
-		}
+		} // !STATIC
 
 		sockOperator->sendBuffer(sockOperator->hostSocket, buffer, bufferSize, record.sendAddr);
 	}
