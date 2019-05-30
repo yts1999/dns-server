@@ -8,13 +8,13 @@ uint16_t RecordTable::insertRecord(Message &message) {
 	Record recordBuf = {
 		.id = message.header.id,
 		.sendAddr = message.sendAddr,
+		.domainName = message.question.begin()->getName(),
 		.timePoint = std::chrono::system_clock::now()
 	};
 	table.push_back(std::make_pair(
 		++curNumber,
 		recordBuf
 	));
-	std::cout << "Insert record ID: " << curNumber << std::endl;
 	return curNumber;
 }
 

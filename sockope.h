@@ -10,11 +10,7 @@
 const std::string NAME_SERVER_IP = "114.114.114.114";
 
 #define SOCKET int
-<<<<<<< HEAD
 #define UDP_PROTO        0
-=======
-#define UDP_PROTO        17
->>>>>>> 13dbe758e95a9a5d65e018c60067539434277908
 #define PORT             53
 #define MAX_MESSAGE      4096
 
@@ -24,18 +20,13 @@ public:
 	~SocketOperator();
 	int recvMessage(uint8_t *buffer, sockaddr_in &senderAddr);
 	void sendMessage(const Message &message);
-	void sendBuffer(uint8_t *buffer, int bufferSize, sockaddr_in addr);
+	void sendBuffer(SOCKET &socket, uint8_t *buffer, int bufferSize, sockaddr_in addr);
 	void sendServerPac(const Message &message);
-private:
 	SOCKET hostSocket;
-<<<<<<< HEAD
+	SOCKET serverSocket;
+private:
 	
+	sockaddr_in serverAddr;
 };
 
 #endif // SOCKOPE_H
-=======
-
-};
-
-#endif // SOCKOPE_H
->>>>>>> 13dbe758e95a9a5d65e018c60067539434277908

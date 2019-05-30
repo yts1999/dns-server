@@ -16,7 +16,6 @@ Message::Message(const sockaddr_in addr, const uint8_t *buf, int bufLen) :
 		getResource(ptrBuffer, answer, header.anCount);
 		getResource(ptrBuffer, authority, header.nsCount);
 		getResource(ptrBuffer, additional, header.arCount);
-		std::cout << "resource get!" << std::endl;
 	}
 }
 
@@ -61,7 +60,6 @@ void Message::getHeader(uint8_t *&bufPtr) {
 	header.arCount     = ntohs(*(headerPtr + 5));
 
 	bufPtr += 12;
-	std::cout << header;
 }
 
 void Message::getQuestion(uint8_t *&bufPtr) {
@@ -83,7 +81,6 @@ void Message::getQuestion(uint8_t *&bufPtr) {
 		getdWord(questionBuf.QClass, bufPtr);
 		question.push_back(questionBuf);
 	}
-	std::cout << "Question set done!" << std::endl;
 }
 
 void Message::getResource(uint8_t *&bufPtr, std::vector<Message::Resource> &resourceVec, uint16_t count) {

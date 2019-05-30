@@ -7,6 +7,7 @@
 #include "sockope.h"
 #include "table.h"
 #include "record.h"
+#include "utils.h"
 
 enum MsgType {
 	STD_QUERY,
@@ -19,6 +20,7 @@ public:
 	Parser();
 	void parse();
 	void receive();
+	void writeBack();
 private:
 	Message message;
 	uint8_t *buffer;

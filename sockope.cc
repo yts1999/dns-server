@@ -15,6 +15,14 @@ SocketOperator::SocketOperator() {
 			std::cout << "------Local binding Success, Start listening...------" << std::endl;
 		}
 	}
+
+	serverSocket = socket(PF_INET, SOCK_DGRAM, UDP_PROTO);
+	if (serverSocket >= 0) {
+		serverAddr.sin_family = AF_INET;
+		serverAddr.sin_port = htons(PORT);
+		serverAddr.sin_addr.s_addr = inet_addr(NAME_SERVER_IP.c_str());
+			std::cout << "      ------Server socket create Success------" << std::endl;
+	}
 }
 
 SocketOperator::~SocketOperator() {
@@ -29,7 +37,7 @@ int SocketOperator::recvMessage(uint8_t *buffer, sockaddr_in &senderAddr) {
 	int recvLen = recvfrom(hostSocket, (char *)buffer, MAX_MESSAGE, 
 	                       0, (sockaddr *)&clientAddr, &addrLen);
 	if (recvLen <= 0) {
-		std::cout << "Connention Error" << std::endl;
+		std::cout << "Connection Error" << std::endl;
 		exit(0);
 	} else {
 
@@ -51,14 +59,14 @@ void SocketOperator::sendMessage(const Message &message) {
 		}
 }
 
-void SocketOperator::sendBuffer(uint8_t *buffer, int bufferSize, sockaddr_in addr) {
+void SocketOperator::sendBuffer(SOCKET &socket, uint8_t *buffer, int bufferSize, sockaddr_in addr) {
 
-	if (sendto(hostSocket, buffer, bufferSize, 0,
+	if (sendto(socket, buffer, bufferSize, 0,
 	    (const sockaddr *)&addr, sizeof(addr)) < 0) {
 			std::cout << "Send Buffer Error" << std::endl;
 			exit(0);
 		} else {
-			std::cout << "Send buffer seccess!" << std::endl;
+//			std::cout << "Send buffer seccess!" << std::endl;
 		}
 }
 
