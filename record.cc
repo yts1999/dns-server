@@ -1,10 +1,12 @@
-#include "record.h"
+#include "include/record.h"
 
 RecordTable::RecordTable() {
+// 查询记录表初始化
 	curNumber = 0;
 }
 
 uint16_t RecordTable::insertRecord(Message &message) {
+// 在查询记录表中插入一条记录
 	Record recordBuf = {
 		.id = message.header.id,
 		.sendAddr = message.sendAddr,
@@ -23,6 +25,7 @@ uint16_t RecordTable::getCurNumber() {
 }
 
 bool RecordTable::findRecord(ID id, RecordTable::Record &recordBuffer) {
+// 在记录表中根据 ID 字段查询记录
 	std::vector<std::pair<ID, Record>>::iterator iter;
 	bool good = false;
 	for (iter = table.begin(); iter != table.end(); ++iter) {
@@ -37,6 +40,7 @@ bool RecordTable::findRecord(ID id, RecordTable::Record &recordBuffer) {
 }
 
 void RecordTable::eraseTimeout() {
+// 清除记录表中超时的记录
 	std::vector<std::pair<ID, Record>>::iterator iter;
 	for (iter = table.begin(); iter != table.end();) {
 		TimePoint recordTime = iter->second.timePoint;

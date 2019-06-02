@@ -2,6 +2,7 @@
 #define MESSAGE_H
 
 #include "network.h"
+#include <cstring>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -9,9 +10,10 @@
 
 #include "utils.h"
 
-#define BUF_SIZE 4096
+#define BUF_SIZE 4096   // 缓冲区最大容量
 
 class Message {
+// DNS 报文结构
 public:
 	Message();
 	Message(const uint8_t *buffer, int bufferSize, const sockaddr_in *sendAddr);
@@ -122,6 +124,9 @@ private:
 	void getResource(uint8_t *&bufPtr, std::vector<Resource> &resourceVec, uint16_t count);
 	void getdWord(uint16_t &target, uint8_t *&bufPtr);
 	void getqWord(uint32_t &target, uint8_t *&bufPtr);
+
+	uint8_t *messagePtr;
+	void handleLabel(uint8_t *&namePtr, std::string &nameBuf);
 };
 
 std::ostream &operator << (std::ostream &os,

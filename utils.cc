@@ -5,6 +5,7 @@ bool STATIC = true;
 int debugOption = 0;
 
 void toLower(std::string &str) {
+// 将域名转换为小写字母
 	for (std::string::iterator iter = str.begin();
 		 iter != str.end(); ++iter) {
 			 *iter = tolower(*iter);
@@ -12,6 +13,7 @@ void toLower(std::string &str) {
 }
 
 void helper() {
+// 显示使用说明
 	std::cout << "Usage: ./dnsrelay [--update]" << std::endl
 	          << "                  [--debug ]" << std::endl
 			  << "--update : update local cache dynamicly using LRU Algorithm" << std::endl
@@ -19,6 +21,7 @@ void helper() {
 }
 
 void parseOpt(int argc, char **argv) {
+// 处理命令行参数
 	if (argc > 3) {
 		helper();
 		exit(0);

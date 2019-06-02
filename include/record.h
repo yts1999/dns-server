@@ -9,9 +9,10 @@
 
 using ID = uint16_t;
 using TimePoint = std::chrono::system_clock::time_point;
-const std::chrono::seconds timeOut = std::chrono::seconds(5);
+const std::chrono::seconds timeOut = std::chrono::seconds(10);
 
 class RecordTable {
+// 网络远程查询记录表
 public:	
 	RecordTable();
 	~RecordTable();

@@ -10,12 +10,14 @@
 #include "utils.h"
 
 enum MsgType {
+// 报文基本类型
 	STD_QUERY,
 	RESPONSE,
 	OTHER
 };
 
 class Parser {
+// 报文处理逻辑实现
 public:
 	Parser();
 	void parse();
@@ -29,7 +31,8 @@ private:
 	bool isStdQuery();
 	MsgType getMsgType();
 	void parseQuery();
-	void prepAnswerMsg(DoubleWordIP answerIP, std::string &name);
+	void prepAnswerMsg(QuadWordIP answerIP, std::string &name);
+	void prepAnswerMsg6(HexWordIP answerIP, std::string &name);
 	void send2Server();
 	void recvServer();
 	void setServerAddr();

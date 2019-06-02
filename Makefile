@@ -1,12 +1,15 @@
 default:
 	$(MAKE) full
 
-full: main.o buffer.o message.o parser.o record.o sockope.o table.o utils.o
-	g++ main.o buffer.o message.o parser.o record.o sockope.o table.o utils.o -o dnsrelay -lm
+full: main.cc buffer.cc message.cc parser.cc record.cc sockope.cc table.cc utils.cc
+	g++ main.cc buffer.cc message.cc parser.cc record.cc sockope.cc table.cc utils.cc -o dnsrelay --std=c++14 
 
 run:
 	$(MAKE) full
-	./main
+	./dnsrelay
 
 clean:
 	$(RM) *.o main
+
+count:
+	@echo "Total code lines: `ls include/*.h *.cc | xargs cat | wc -l`"
