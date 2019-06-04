@@ -133,7 +133,7 @@ bool HostsTable::findHost(const std::string &domainName, QuadWordIP &hostIP, tim
 	std::map<std::string, Property>::iterator iter = idMap.find(domainName);
 	if (iter != idMap.end()) {
 		time_t curTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-		if (iter->second.timeoutTime - curTime < MIN_TTL) { //存在条目但已经过期
+		if (iter->second.timeoutTime - curTime < MIN_TTL) { // 存在条目但已经过期
 			idMap.erase(iter);
 			propertySet.erase(std::make_pair(iter->second, iter->first));
 			timeoutSet.erase(*iter);
@@ -143,7 +143,7 @@ bool HostsTable::findHost(const std::string &domainName, QuadWordIP &hostIP, tim
 		timeoutSet.erase(*iter);
 		iter->second.frequent++;
 		propertySet.insert(std::make_pair(iter->second, iter->first));
-		timeoutSet.erase(*iter);
+		timeoutSet.insert(*iter);
 		hostIP = iter->second.ip;
 		timeoutTime = iter->second.timeoutTime;
 		return true;
@@ -157,7 +157,7 @@ void HostsTable::eraseName() {
 	if (! idMap.empty()) {
 		time_t curTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 		std::set<std::pair<std::string, Property> >::iterator it = timeoutSet.begin();
-		if (it->second.ip != 0 && it->second.timeoutTime - curTime < MIN_TTL) { //存在已过期的条目
+		if (it->second.ip != 0 && it->second.timeoutTime - curTime < MIN_TTL) { // 存在已过期的条目
 			idMap.erase(it->first);
 			propertySet.erase(std::make_pair(it->second, it->first));
 			timeoutSet.erase(it);
@@ -167,6 +167,7 @@ void HostsTable::eraseName() {
 		if (iter->first.ip != 0) {
 			idMap.erase(iter->second);
 			propertySet.erase(iter);
+			timeoutSet.erase(std::make_pair(iter->second, iter->first));
 		}
 	}
 }
@@ -300,6 +301,7 @@ void HostsTable::eraseName6() {
 		if (iter->first.ip != 0) {
 			idMap6.erase(iter->second);
 			propertySet6.erase(iter);
+			timeoutSet6.erase(std::make_pair(iter->second, iter->first));
 		}
 	}
 }
