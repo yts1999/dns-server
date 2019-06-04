@@ -9,7 +9,7 @@ run:
 	./dnsrelay
 
 clean:
-	$(RM) *.o main
+	$(RM) *.o dnsrelay
 
 count:
 	@echo "Total code lines: `ls include/*.h *.cc | xargs cat | wc -l`"

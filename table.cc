@@ -157,7 +157,7 @@ void HostsTable::readFile6() {
 			in6_addr hostAddr;
 			inet_pton(AF_INET6, ip.c_str(), (void *)&hostAddr);
 			Property6 propBuf = {
-				.ip = *(__uint128_t *)&hostAddr.__u6_addr,//__in6_u,
+				.ip = *(__uint128_t *)&hostAddr.__in6_u,
 				.frequent = 0
 			};
 			idMap6.insert(std::pair<std::string, Property6>(domainName, propBuf));
