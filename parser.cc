@@ -13,7 +13,7 @@ void Parser::receive() {
 // 从 socket 处理模块中接受一条报文
 	sockaddr_in clientAddr;
 	int bufferLen;
-	bufferLen = sockOperator->recvMessage(buffer, clientAddr);
+	bufferLen = sockOperator->recvMessage(buffer, clientAddr, recvTime);
 	bufferSize = bufferLen;
 	message = Message(clientAddr, buffer, bufferSize);
 }
@@ -55,9 +55,10 @@ void Parser::parseQuery() {
 			std::cout << "Query name:   | " << domainName << " --> ";
 
 			QuadWordIP ipReturn;
-			if (table->findHost(domainName, ipReturn)) {
+			time_t timeoutTime;
+			if (table->findHost(domainName, ipReturn, timeoutTime)) {
 				std::cout << "Domain name found" << std::endl;
-				prepAnswerMsg(ipReturn, query->QName);
+				prepAnswerMsg(ipReturn, query->QName, timeoutTime);
 			} else {
 				std::cout << "Cannot find locally, to name server..." << std::endl;
 				send2Server();
@@ -70,10 +71,10 @@ void Parser::parseQuery() {
 			std::cout << "Query name:   | " << domainName << " --> ";
 
 			HexWordIP ipReturn;
-				
-			if (table->findHost6(domainName, ipReturn)) {
+			time_t timeoutTime;
+			if (table->findHost6(domainName, ipReturn, timeoutTime)) {
 				std::cout << "Domain name found" << std::endl;
-				prepAnswerMsg6(ipReturn, query->QName);
+				prepAnswerMsg6(ipReturn, query->QName, timeoutTime);
 			} else {
 				std::cout << "Cannot find locally, to name server..." << std::endl;
 				send2Server();
@@ -117,7 +118,7 @@ bool Parser::isStdQuery() {
 	);
 }
 
-void Parser::prepAnswerMsg(QuadWordIP answerIP, std::string &name) {
+void Parser::prepAnswerMsg(QuadWordIP answerIP, const std::string &name, time_t timeoutTime) {
 // 将一条应答字段推入应答报文
 	if (answerIP == (uint32_t)0x0) {
 		message.header.rCode = 3;
@@ -131,13 +132,13 @@ void Parser::prepAnswerMsg(QuadWordIP answerIP, std::string &name) {
 	answerBuffer.name = name;
 	answerBuffer.type = 1;
 	answerBuffer.clas = 1;
-	answerBuffer.ttl  = 120;
+	answerBuffer.ttl  = timeoutTime - std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	answerBuffer.rdLength = 4;
 	answerBuffer.rData.assign((uint8_t *)&answerIP, (uint8_t *)(&answerIP + 1));
 	message.answer.push_back(answerBuffer);
 }
 
-void Parser::prepAnswerMsg6(HexWordIP answerIP, std::string &name) {
+void Parser::prepAnswerMsg6(HexWordIP answerIP, const std::string &name, time_t timeoutTime) {
 // IPv6 地址查询的应答逻辑
 	if (answerIP == (__uint128_t)0x0) {
 		message.header.rCode = 3;
@@ -151,7 +152,7 @@ void Parser::prepAnswerMsg6(HexWordIP answerIP, std::string &name) {
 	answerBuffer.name = name;
 	answerBuffer.type = 28;
 	answerBuffer.clas = 1;
-	answerBuffer.ttl  = 120;
+	answerBuffer.ttl  = timeoutTime - std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	answerBuffer.rdLength = 16;
 	answerBuffer.rData.assign((uint8_t *)&answerIP, (uint8_t *)(&answerIP + 1));
 	message.answer.push_back(answerBuffer);
@@ -185,14 +186,15 @@ void Parser::recvServer() {
 				// IPv4 记录写入
 					uint8_t *dataArr = message.answer[i].rData.data();
 					QuadWordIP ipRecvd = *(QuadWordIP *)dataArr;
+					time_t timeoutTime = recvTime + message.answer[i].ttl;
 					if (ipRecvd == (uint32_t)0x0)
 						continue;
 					if (table->getTableSize() < MAX_TABLE) {
-						table->insertName(record.domainName, ipRecvd);
+						table->insertName(record.domainName, ipRecvd, timeoutTime);
 					}
 					else {
 						table->eraseName();
-						table->insertName(record.domainName, ipRecvd);
+						table->insertName(record.domainName, ipRecvd, timeoutTime);
 					}
 					break;
 				}
@@ -200,14 +202,15 @@ void Parser::recvServer() {
 				// IPv6 记录写入
 					uint8_t *dataArr = message.answer[i].rData.data();
 					HexWordIP ipRecvd = *(HexWordIP *)dataArr;
+					time_t timeoutTime = recvTime + message.answer[i].ttl;
 					if (ipRecvd == (__uint128_t)0x0)
 						continue;
 					if (table->getTableSize6() < MAX_TABLE) {
-						table->insertName6(record.domainName, ipRecvd);
+						table->insertName6(record.domainName, ipRecvd, timeoutTime);
 					}
 					else {
 						table->eraseName6();
-						table->insertName6(record.domainName, ipRecvd);
+						table->insertName6(record.domainName, ipRecvd, timeoutTime);
 					}
 					break;
 				}

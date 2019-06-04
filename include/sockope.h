@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <chrono>
 
 #include "message.h"
 #include "network.h"
@@ -19,7 +20,7 @@ class SocketOperator {
 public:
 	SocketOperator();
 	~SocketOperator();
-	int recvMessage(uint8_t *buffer, sockaddr_in &senderAddr);
+	int recvMessage(uint8_t *buffer, sockaddr_in &senderAddr, time_t &recvTime);
 	void sendMessage(const Message &message);
 	void sendBuffer(SOCKET &socket, uint8_t *buffer, int bufferSize, sockaddr_in addr);
 //	void sendServerPac(const Message &message);

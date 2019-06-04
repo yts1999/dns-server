@@ -44,11 +44,13 @@ void HostsTable::readFile() {
 			inet_pton(AF_INET, ip.c_str(), (void *)&hostAddr);
 			Property propBuf = {
 				.ip = hostAddr.s_addr,
-				.frequent = 0
+				.frequent = 0,
+				.timeoutTime = LONG_MAX
 			};
 
-			idMap.insert(std::pair<std::string, Property>(domainName, propBuf));
-			propertySet.insert(std::pair<Property, std::string>(propBuf, domainName));
+			idMap.insert(std::make_pair(domainName, propBuf));
+			propertySet.insert(std::make_pair(propBuf, domainName));
+			timeoutSet.insert(std::make_pair(domainName, propBuf));
 		}
 		file.close();
 	} else {
@@ -62,14 +64,18 @@ void HostsTable::readFreqFile() {
 	std::string domainName;
 	QuadWordIP buf;
 	int freqBuf;
+	time_t timeoutTime;
 	if (file.is_open()) {
-		while (file >> domainName >> freqBuf) {
+		while (file >> domainName >> freqBuf >> timeoutTime) {
 			toLower(domainName);
 			std::map<std::string, Property>::iterator iter = idMap.find(domainName);
 			if (iter != idMap.end()) {
-				propertySet.erase(std::pair<Property, std::string>(iter->second, iter->first));
+				propertySet.erase(std::make_pair(iter->second, iter->first));
+				timeoutSet.erase(*iter);
 				iter->second.frequent = freqBuf;
-				propertySet.insert(std::pair<Property, std::string>(iter->second, iter->first));
+				iter->second.timeoutTime = timeoutTime;
+				propertySet.insert(std::make_pair(iter->second, iter->first));
+				timeoutSet.insert(*iter);
 			}
 		}
 		file.close();
@@ -102,7 +108,7 @@ void HostsTable::writeFreqFile() {
 	if (file.is_open()) {
 		std::map<std::string, Property>::iterator iter = idMap.begin();
 		for (; iter != idMap.end(); ++iter) {
-			file << iter->first << " " << iter->second.frequent << std::endl;
+			file << iter->first << " " << iter->second.frequent << " " << iter->second.timeoutTime << std::endl;
 		}
 		file.close();
 	} else {
@@ -110,24 +116,36 @@ void HostsTable::writeFreqFile() {
 	}
 }
 
-void HostsTable::insertName(std::string domainName, QuadWordIP ip) {
+void HostsTable::insertName(std::string domainName, QuadWordIP ip, time_t timeoutTime) {
 // 在表中插入一条记录
 	Property propBuf = {
 		.ip = ip,
-		.frequent = 1
+		.frequent = 1,
+		.timeoutTime = timeoutTime
 	};
-	idMap.insert(std::pair<std::string, Property>(domainName, propBuf));
-	propertySet.insert(std::pair<Property, std::string>(propBuf, domainName));
+	idMap.insert(std::make_pair(domainName, propBuf));
+	propertySet.insert(std::make_pair(propBuf, domainName));
+	timeoutSet.insert(std::make_pair(domainName, propBuf));
 }
 
-bool HostsTable::findHost(const std::string &domainName, QuadWordIP &hostIP) {
-// 在表中根据域名查询 IP 地址 
+bool HostsTable::findHost(const std::string &domainName, QuadWordIP &hostIP, time_t &timeoutTime) {
+// 在表中根据域名查询 IP 地址
 	std::map<std::string, Property>::iterator iter = idMap.find(domainName);
 	if (iter != idMap.end()) {
-		propertySet.erase(std::pair<Property, std::string>(iter->second, iter->first));
+		time_t curTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+		if (iter->second.timeoutTime - curTime < MIN_TTL) { //存在条目但已经过期
+			idMap.erase(iter);
+			propertySet.erase(std::make_pair(iter->second, iter->first));
+			timeoutSet.erase(*iter);
+			return false;
+		}
+		propertySet.erase(std::make_pair(iter->second, iter->first));
+		timeoutSet.erase(*iter);
 		iter->second.frequent++;
-		propertySet.insert(std::pair<Property, std::string>(iter->second, iter->first));
+		propertySet.insert(std::make_pair(iter->second, iter->first));
+		timeoutSet.erase(*iter);
 		hostIP = iter->second.ip;
+		timeoutTime = iter->second.timeoutTime;
 		return true;
 	} else {
 		return false;
@@ -136,7 +154,15 @@ bool HostsTable::findHost(const std::string &domainName, QuadWordIP &hostIP) {
 
 void HostsTable::eraseName() {
 // 从表中删除一条记录
-	if (! propertySet.empty()) {
+	if (! idMap.empty()) {
+		time_t curTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+		std::set<std::pair<std::string, Property> >::iterator it = timeoutSet.begin();
+		if (it->second.ip != 0 && it->second.timeoutTime - curTime < MIN_TTL) { //存在已过期的条目
+			idMap.erase(it->first);
+			propertySet.erase(std::make_pair(it->second, it->first));
+			timeoutSet.erase(it);
+			return;
+		}
 		std::set<std::pair<Property, std::string> >::iterator iter = propertySet.begin();
 		if (iter->first.ip != 0) {
 			idMap.erase(iter->second);
@@ -157,11 +183,13 @@ void HostsTable::readFile6() {
 			in6_addr hostAddr;
 			inet_pton(AF_INET6, ip.c_str(), (void *)&hostAddr);
 			Property6 propBuf = {
-				.ip = *(__uint128_t *)&hostAddr.__in6_u,
-				.frequent = 0
+				.ip = *(__uint128_t *)&hostAddr.__u6_addr,
+				.frequent = 0,
+				.timeoutTime = LONG_MAX
 			};
-			idMap6.insert(std::pair<std::string, Property6>(domainName, propBuf));
-			propertySet6.insert(std::pair<Property6, std::string>(propBuf, domainName));
+			idMap6.insert(std::make_pair(domainName, propBuf));
+			propertySet6.insert(std::make_pair(propBuf, domainName));
+			timeoutSet6.insert(std::make_pair(domainName, propBuf));
 		}
 		file.close();
 	} else {
@@ -174,14 +202,18 @@ void HostsTable::readFreqFile6() {
 	std::string domainName;
 	HexWordIP buf;
 	int freqBuf;
+	time_t timeoutTime;
 	if (file.is_open()) {
-		while (file >> domainName >> freqBuf) {
+		while (file >> domainName >> freqBuf >> timeoutTime) {
 			toLower(domainName);
 			std::map<std::string, Property6>::iterator iter = idMap6.find(domainName);
 			if (iter != idMap6.end()) {
-				propertySet6.erase(std::pair<Property6, std::string>(iter->second, iter->first));
+				propertySet6.erase(std::make_pair(iter->second, iter->first));
+				timeoutSet6.erase(*iter);
 				iter->second.frequent = freqBuf;
-				propertySet6.insert(std::pair<Property6, std::string>(iter->second, iter->first));
+				iter->second.timeoutTime = timeoutTime;
+				propertySet6.insert(std::make_pair(iter->second, iter->first));
+				timeoutSet6.insert(*iter);
 			}
 		}
 		file.close();
@@ -212,7 +244,7 @@ void HostsTable::writeFreqFile6() {
 	if (file.is_open()) {
 		std::map<std::string, Property6>::iterator iter = idMap6.begin();
 		for (; iter != idMap6.end(); ++iter) {
-			file << iter->first << " " << iter->second.frequent << std::endl;
+			file << iter->first << " " << iter->second.frequent  << " " << iter->second.timeoutTime << std::endl;
 		}
 		file.close();
 	} else {
@@ -220,22 +252,34 @@ void HostsTable::writeFreqFile6() {
 	}
 }
 
-void HostsTable::insertName6(std::string domainName, HexWordIP ip) {
+void HostsTable::insertName6(std::string domainName, HexWordIP ip, time_t timeoutTime) {
 	Property6 propBuf = {
 		.ip = ip,
-		.frequent = 1
+		.frequent = 1,
+		.timeoutTime = timeoutTime
 	};
-	idMap6.insert(std::pair<std::string, Property6>(domainName, propBuf));
-	propertySet6.insert(std::pair<Property6, std::string>(propBuf, domainName));
+	idMap6.insert(std::make_pair(domainName, propBuf));
+	propertySet6.insert(std::make_pair(propBuf, domainName));
+	timeoutSet6.insert(std::make_pair(domainName, propBuf));
 }
 
-bool HostsTable::findHost6(const std::string &domainName, HexWordIP &hostIP) {
+bool HostsTable::findHost6(const std::string &domainName, HexWordIP &hostIP, time_t &timeoutTime) {
 	std::map<std::string, Property6>::iterator iter = idMap6.find(domainName);
 	if (iter != idMap6.end()) {
-		propertySet6.erase(std::pair<Property6, std::string>(iter->second, iter->first));
+		time_t curTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+		if (iter->second.timeoutTime - curTime < MIN_TTL) {
+			idMap6.erase(iter);
+			propertySet6.erase(std::make_pair(iter->second, iter->first));
+			timeoutSet6.erase(*iter);
+			return false;
+		}
+		propertySet6.erase(std::make_pair(iter->second, iter->first));
+		timeoutSet6.erase(*iter);
 		iter->second.frequent++;
-		propertySet6.insert(std::pair<Property6, std::string>(iter->second, iter->first));
+		propertySet6.insert(std::make_pair(iter->second, iter->first));
+		timeoutSet6.insert(*iter);
 		hostIP = iter->second.ip;
+		timeoutTime = iter->second.timeoutTime;
 		return true;
 	} else {
 		return false;
@@ -243,7 +287,15 @@ bool HostsTable::findHost6(const std::string &domainName, HexWordIP &hostIP) {
 }
 
 void HostsTable::eraseName6() {
-	if (! propertySet6.empty()) {
+	if (! idMap6.empty()) {
+		time_t curTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+		std::set<std::pair<std::string, Property6> >::iterator it = timeoutSet6.begin();
+		if (it->second.ip != 0 && it->second.timeoutTime - curTime < MIN_TTL) {
+			idMap6.erase(it->first);
+			propertySet6.erase(std::make_pair(it->second, it->first));
+			timeoutSet6.erase(it);
+			return;
+		}
 		std::set<std::pair<Property6, std::string> >::iterator iter = propertySet6.begin();
 		if (iter->first.ip != 0) {
 			idMap6.erase(iter->second);

@@ -136,7 +136,7 @@ void Message::getdWord(uint16_t &target, uint8_t *&bufPtr) {
 void Message::getqWord(uint32_t &target, uint8_t *&bufPtr) {
 // 将 4 字节的信息从结构体中提取至缓冲区
 	uint32_t *qWordPtr = (uint32_t *)bufPtr;
-	target = ntohs(*qWordPtr);
+	target = ntohl(*qWordPtr);
 	bufPtr += sizeof(uint32_t);
 }
 

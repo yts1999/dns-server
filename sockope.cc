@@ -32,13 +32,13 @@ SocketOperator::~SocketOperator() {
 	close(serverSocket);
 }
 
-int SocketOperator::recvMessage(uint8_t *buffer, sockaddr_in &senderAddr) {
+int SocketOperator::recvMessage(uint8_t *buffer, sockaddr_in &senderAddr, time_t &recvTime) {
 // 从 socket 中接收一条报文
 	memset(buffer, 0, BUF_SIZE);
 	socklen_t addrLen = sizeof(sockaddr_in);
 	sockaddr_in clientAddr;
-
-	int recvLen = recvfrom(hostSocket, (char *)buffer, MAX_MESSAGE, 
+	recvTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+	int recvLen = recvfrom(hostSocket, (char *)buffer, MAX_MESSAGE,
 	                       0, (sockaddr *)&clientAddr, &addrLen);
 	if (recvLen <= 0) {
 		std::cout << "Connection Error" << std::endl;
@@ -58,7 +58,7 @@ void SocketOperator::sendMessage(const Message &message) {
 	int bufSize;
 	message.pac2Buf(buffer, bufSize);
 
-	if (sendto(hostSocket, buffer, bufSize, 0, 
+	if (sendto(hostSocket, buffer, bufSize, 0,
 	    (const sockaddr*)&message.sendAddr, sizeof(sockaddr_in)) < 0) {
 			std::cout << "Send Error" << std::endl;
 			exit(0);
@@ -75,5 +75,3 @@ void SocketOperator::sendBuffer(SOCKET &socket, uint8_t *buffer, int bufferSize,
 //			std::cout << "Send buffer seccess!" << std::endl;
 		}
 }
-
-
